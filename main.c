@@ -5,10 +5,7 @@
 #define CLUSTER_SIZE	2*SECTOR_SIZE
 #define ENTRY_BY_CLUSTER CLUSTER_SIZE /sizeof(dir_entry_t)
 #define NUM_CLUSTER	4096
-
-unsigned short fat[NUM_CLUSTER];
-unsigned char boot_block[CLUSTER_SIZE];
-unsigned char root_dir[CLUSTER_SIZE];
+#define fat_name	"fat.part"
 struct _dir_entry_t
 {
 	unsigned char filenam[18];
@@ -26,12 +23,16 @@ union _data_cluster
 
 typedef union _data_cluster data_cluster;
 
+unsigned short fat[NUM_CLUSTER];
+unsigned char boot_block[CLUSTER_SIZE];
+unsigned char root_dir[CLUSTER_SIZE];
+data_cluster clusters[4086];
 
-int main(int argc, char *argv[])
+void init(void)
 {
 	FILE* ptr_file;
-	ptr_file = fopen("fat.part","w");
 	int i;
+	ptr_file = fopen(fat_name,"wb");
 	for (i = 0; i < CLUSTER_SIZE; ++i) 
 		boot_block[i] = 0xbb;
 
@@ -49,9 +50,48 @@ int main(int argc, char *argv[])
 
 	fwrite(&root_dir, sizeof(root_dir), 1,ptr_file);
 
-	/*for (i = 0; i < 4086; ++i)*/
-		/*fwrite(0x00, sizeof(data_cluster), 1, ptr_file);*/
+	for (i = 0; i < 4086; ++i)
+		fwrite(&clusters, sizeof(data_cluster), 1, ptr_file);
 
 	fclose(ptr_file);
-	return 0;
+}
+
+void load()
+{
+	FILE* ptr_file;
+	int i;
+	ptr_file = fopen(fat_name, "rb");
+	fseek(ptr_file, sizeof(boot_block), SEEK_SET);
+	int bytes = fread(fat, sizeof(fat), 1, ptr_file);
+	fclose(ptr_file);
+	FILE* load_tst;
+	load_tst = fopen("load.tst", "wb");
+	fwrite(&fat, sizeof(fat), 1, load_tst);
+	fclose(load_tst);
+}
+void ls()
+{
+}
+void mkdir()
+{
+}
+void create()
+{
+}
+void unlink()
+{
+}
+void write()
+{
+}
+void append()
+{
+}
+void read()
+{
+}
+
+int main(int argc, char *argv[])
+{
+	load();
 }
