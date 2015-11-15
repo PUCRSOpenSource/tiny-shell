@@ -9,7 +9,6 @@
 unsigned short fat[NUM_CLUSTER];
 unsigned char boot_block[CLUSTER_SIZE];
 unsigned char root_dir[CLUSTER_SIZE];
-unsigned char root_dir[CLUSTER_SIZE];
 struct _dir_entry_t
 {
 	unsigned char filenam[18];
@@ -35,22 +34,23 @@ int main(int argc, char *argv[])
 	int i;
 	for (i = 0; i < CLUSTER_SIZE; ++i) 
 		boot_block[i] = 0xbb;
-	
+
 	fwrite(&boot_block, sizeof(boot_block), 1,ptr_file);
 
 	fat[0] = 0xfffd;
 	for (i = 1; i < 9; ++i)
 		fat[i] = 0xfffe;
-	
+
 	fat[9] = 0xffff;
 	for (i = 10; i < NUM_CLUSTER; ++i)
 		fat[i] = 0x0000;
-	
+
 	fwrite(&fat, sizeof(fat), 1, ptr_file);
 
 	fwrite(&root_dir, sizeof(root_dir), 1,ptr_file);
 
-
+	/*for (i = 0; i < 4086; ++i)*/
+		/*fwrite(0x00, sizeof(data_cluster), 1, ptr_file);*/
 
 	fclose(ptr_file);
 	return 0;
