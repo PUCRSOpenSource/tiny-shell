@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #define SECTOR_SIZE	512
@@ -25,7 +26,7 @@ typedef union _data_cluster data_cluster;
 
 unsigned short fat[NUM_CLUSTER];
 unsigned char boot_block[CLUSTER_SIZE];
-unsigned char root_dir[CLUSTER_SIZE];
+dir_entry_t root_dir[32];
 data_cluster clusters[4086];
 
 void init(void)
@@ -33,7 +34,7 @@ void init(void)
 	FILE* ptr_file;
 	int i;
 	ptr_file = fopen(fat_name,"wb");
-	for (i = 0; i < CLUSTER_SIZE; ++i) 
+	for (i = 0; i < 2; ++i) 
 		boot_block[i] = 0xbb;
 
 	fwrite(&boot_block, sizeof(boot_block), 1,ptr_file);
@@ -47,7 +48,6 @@ void init(void)
 		fat[i] = 0x0000;
 
 	fwrite(&fat, sizeof(fat), 1, ptr_file);
-
 	fwrite(&root_dir, sizeof(root_dir), 1,ptr_file);
 
 	for (i = 0; i < 4086; ++i)
@@ -72,8 +72,9 @@ void load()
 void ls()
 {
 }
-void mkdir()
+void mkdir(char* path)
 {
+	dir_entry_t* dir_entry = calloc(1, sizeof(dir_entry_t));
 }
 void create()
 {
@@ -90,8 +91,15 @@ void append()
 void read()
 {
 }
-
-int main(int argc, char *argv[])
+int main(void)
 {
-	load();
+	init();
+	char path[] = "/home/djornada/Downloads/ED";
+	char token[2] = "/";
+	char* dir = strtok(path, token);
+	while (dir != NULL) {
+		printf("%s -> %s\n", path, dir);
+		dir = strtok(NULL, token);
+	}
+	return 0;
 }
