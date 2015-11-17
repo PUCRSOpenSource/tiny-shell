@@ -9,7 +9,7 @@
 #define fat_name	"fat.part"
 struct _dir_entry_t
 {
-	unsigned char filenam[18];
+	unsigned char filename[18];
 	unsigned char attributes;
 	unsigned char reserved[7];
 	unsigned short first_block;
@@ -62,19 +62,40 @@ void load()
 	int i;
 	ptr_file = fopen(fat_name, "rb");
 	fseek(ptr_file, sizeof(boot_block), SEEK_SET);
-	int bytes = fread(fat, sizeof(fat), 1, ptr_file);
+	fread(fat, sizeof(fat), 1, ptr_file);
+	fread(root_dir, sizeof(root_dir), 1, ptr_file);
 	fclose(ptr_file);
+
 	FILE* load_tst;
 	load_tst = fopen("load.tst", "wb");
 	fwrite(&fat, sizeof(fat), 1, load_tst);
+	fwrite(&root_dir, sizeof(root_dir), 1, load_tst);
 	fclose(load_tst);
 }
 void ls()
 {
 }
-void mkdir(char* path)
+void mkdir(char path[])
 {
 	dir_entry_t* dir_entry = calloc(1, sizeof(dir_entry_t));
+}
+dir_entry_t* find(dir_entry_t* current_dir, char path[])
+{
+	//path = /usr/etc
+	if (!path)
+		return current_dir;
+		
+
+	char* dir = strtok(path, "/");
+	char* aux = strtok(NULL, "\0");
+	int i;
+	for (i = 0; i < 32; ++i)
+		if (current_dir[i].filename == dir)
+
+
+
+	return NULL;
+	/*dir = strtok(NULL, "\0");*/
 }
 void create()
 {
@@ -93,13 +114,15 @@ void read()
 }
 int main(void)
 {
-	init();
-	char path[] = "/home/djornada/Downloads/ED";
-	char token[2] = "/";
-	char* dir = strtok(path, token);
-	while (dir != NULL) {
-		printf("%s -> %s\n", path, dir);
-		dir = strtok(NULL, token);
-	}
+	/*init();*/
+	/*load();*/
+	char path[] = "/usr/bin/core_perl";
+	char* dir = strtok(path, "/");
+	printf("%s\n", dir);
+	dir = strtok(NULL, "\0");
+	printf("%d\n", NULL == dir);
+	printf("%s\n", dir);
+	dir = strtok(dir, "/");
+	printf("%s\n", dir);
 	return 0;
 }
