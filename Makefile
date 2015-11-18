@@ -1,17 +1,32 @@
+IDIR = ./include
+SDIR = ./src
+ODIR = ./obj
+
 .PHONY: clean, mrproper
+
 CC = gcc
 CFLAGS = -g -Wall
 
-all: tp2
+_DEPS = fat.h shell.h
+DEPS  = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+_OBJ  = main.o fat.o shell.o
+OBJ   = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-tp2: tp2.o
-	$(CC) $(CFLAGS) -o $@ $+
+
+
+
+
+
+$(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+tp2: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f *.o core.*
 
 mrproper: clean
+	rm -f ./fat.part
 	rm -f tp2
