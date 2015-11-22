@@ -95,7 +95,6 @@ data_cluster* load_cluster(int block)
 	cluster = calloc(1, sizeof(data_cluster));
 	FILE* ptr_file;
 	ptr_file = fopen(fat_name, "rb");
-	printf("block*sizeof(data_cluster) -> %d\n", block*sizeof(data_cluster));
 	fseek(ptr_file, block*sizeof(data_cluster), SEEK_SET);
 	fread(cluster, sizeof(data_cluster), 1, ptr_file);
 	fclose(ptr_file);
@@ -117,25 +116,25 @@ data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 	strcpy(path_aux, path);
 	char* dir_name = strtok(path_aux, "/");
 	char* rest     = strtok(NULL, "\0");
+		
 	dir_entry_t* current_dir = current_cluster->dir;
-	addr = current_dir->first_block;
 
-	int len = sizeof(dir_entry_t)/sizeof(current_dir);
-	printf("sizeof(current_dir)->%d\n", sizeof(current_dir));
-	printf("sizeof(dir_entry_t)->%d\n", sizeof(dir_entry_t));
-	printf("len-> %d\n", len);
-
-	int i;
+	int i=0;
 	while (i < 32) {
 		dir_entry_t child = current_dir[i];
 		printf("child.filename->%s\n",child.filename);
-		if (strcmp(child.filename, dir_name) && rest){
+		if (strcmp(child.filename, dir_name) == 0 && rest){
 			data_cluster* cluster = load_cluster(child.first_block);
-			return find_parent(cluster, strtok(NULL, "\0"), addr);
+			*addr = child.first_block;
+			printf("child.first_block -> %d\n", *addr);
+			printf("child.filename -> %s\n", child.filename);
+			printf("rest -> %s\n", rest);
+			return find_parent(cluster, rest, addr);
 		}
-		else if (strcmp(child.filename, dir_name) && !rest)
+		else if (strcmp(child.filename, dir_name) == 0 && !rest){
 			return NULL;
-		++i;
+		}
+		i++;
 	}
 	
 	if (!rest)
@@ -247,6 +246,8 @@ int main(void)
 	path = "/home/djornada";
 	mkdir(path);
 
+	path = "/home/djornada/Desktop";
+	mkdir(path);
 	/*char* path2 = "/usr/bin/7z";*/
 	/*mkdir(path2);*/
 	/*mkdir("/");*/
