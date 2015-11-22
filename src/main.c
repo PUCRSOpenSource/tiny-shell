@@ -265,13 +265,13 @@ int main(void)
 		}		
 		if ( strcmp(create, "create ") == 0 && name[7] == '/')
 		{		
-			for(i = 7; i < strlen(name)-1; ++i)
+			for(i = 7; i < strlen(name) - 1; ++i)
 			{
 				create2[i-7] = name[i];
 			}
 			//create(create2);
-			printf("ChamaCreate\n");			
-			printf("%s", create2);			
+			printf("ChamaCreate");			
+			printf("%s", create2);
         	}
 
 	}
