@@ -254,6 +254,30 @@ void ls(char* path)
 		printf("PATH NOT FOUND\n");
 }
 
+void create(char* path)
+{
+	if(path == "/")
+		return;
+
+	int root_addr = 9;
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster_parent = find_parent(root_cluster, path, &root_addr);
+
+	if (cluster_parent){
+		int free_position = find_free_space(cluster_parent->dir);
+		int fat_block = search_fat_free_block();
+		if (fat_block && free_position != -1) {
+			char* dir_name = get_name(path);
+			copy_name(cluster_parent->dir[free_position].filename, dir_name);
+			cluster_parent->dir[free_position].attributes = 2;
+			cluster_parent->dir[free_position].first_block = fat_block;
+			write_cluster(root_addr, cluster_parent);
+		}
+	}
+	else
+		printf("PATH NOT FOUND\n");
+}
+
 int main(void)
 {
 	init();
@@ -471,6 +495,9 @@ int main(void)
 
 	path = "/home/djornada/Downloads";
 	mkdir(path);
+
+	path = "/home/djornada/.vimrc";
+	create(path);
 
 	/*ls("/");*/
 	ls("/home/djornada");
