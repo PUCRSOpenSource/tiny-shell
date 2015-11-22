@@ -47,7 +47,7 @@ void init(void)
 	FILE* ptr_file;
 	int i;
 	ptr_file = fopen(fat_name,"wb");
-	for (i = 0; i < 2; ++i)
+	for (i = 0; i < CLUSTER_SIZE; ++i)
 		boot_block[i] = 0xbb;
 
 	fwrite(&boot_block, sizeof(boot_block), 1,ptr_file);
@@ -76,16 +76,26 @@ void load()
 	ptr_file = fopen(fat_name, "rb");
 	fseek(ptr_file, sizeof(boot_block), SEEK_SET);
 	fread(fat, sizeof(fat), 1, ptr_file);
-	fread(root_dir, sizeof(root_dir), 1, ptr_file);
+	fclose(ptr_file);
+}
+
+void save_fat()
+{
+	FILE* ptr_file;
+	int i;
+	ptr_file = fopen(fat_name, "r+b");
+	fseek(ptr_file, sizeof(boot_block), SEEK_SET);
+	fwrite(fat, sizeof(fat), 1, ptr_file);
 	fclose(ptr_file);
 }
 
 data_cluster* load_cluster(int block)
 {
-
 	data_cluster* cluster;
+	cluster = calloc(1, sizeof(data_cluster));
 	FILE* ptr_file;
 	ptr_file = fopen(fat_name, "rb");
+	printf("block*sizeof(data_cluster) -> %d\n", block*sizeof(data_cluster));
 	fseek(ptr_file, block*sizeof(data_cluster), SEEK_SET);
 	fread(cluster, sizeof(data_cluster), 1, ptr_file);
 	fclose(ptr_file);
@@ -94,38 +104,40 @@ data_cluster* load_cluster(int block)
 
 data_cluster* write_cluster(int block, data_cluster* cluster)
 {
-
 	FILE* ptr_file;
-	ptr_file = fopen(fat_name, "wb");
+	ptr_file = fopen(fat_name, "r+b");
 	fseek(ptr_file, block*sizeof(data_cluster), SEEK_SET);
 	fwrite(cluster, sizeof(data_cluster), 1, ptr_file);
 	fclose(ptr_file);
 }
 
-data_cluster* find_parent(data_cluster* current_cluster, char* path)
+data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 {
 	char path_aux[strlen(path)];
 	strcpy(path_aux, path);
 	char* dir_name = strtok(path_aux, "/");
 	char* rest     = strtok(NULL, "\0");
 	dir_entry_t* current_dir = current_cluster->dir;
+	addr = current_dir->first_block;
 
-	int len = sizeof(current_dir)/sizeof(dir_entry_t);
+	int len = sizeof(dir_entry_t)/sizeof(current_dir);
+	printf("sizeof(current_dir)->%d\n", sizeof(current_dir));
+	printf("sizeof(dir_entry_t)->%d\n", sizeof(dir_entry_t));
+	printf("len-> %d\n", len);
 
 	int i;
-	for (i = 0; i < len; ++i) {
+	while (i < 32) {
 		dir_entry_t child = current_dir[i];
-		if (strcmp(child.filename, dir_name) && rest)
-		{
+		printf("child.filename->%s\n",child.filename);
+		if (strcmp(child.filename, dir_name) && rest){
 			data_cluster* cluster = load_cluster(child.first_block);
-			return find_parent(cluster, strtok(NULL, "\0"));
+			return find_parent(cluster, strtok(NULL, "\0"), addr);
 		}
-		else if (strcmp(child.filename, dir_name) && !rest){
-			printf("PATH ALREDY EXISTS\n");
+		else if (strcmp(child.filename, dir_name) && !rest)
 			return NULL;
-		}
-
+		++i;
 	}
+	
 	if (!rest)
 		return current_cluster;
 
@@ -173,6 +185,7 @@ int search_fat_free_block(void)
 	for (i = 10; i < 4096; ++i)
 		if(!fat[i]){
 			fat[i] = -1;
+			save_fat();
 			return i;
 		}
 	return 0;
@@ -183,8 +196,9 @@ void mkdir(char* path)
 	if(path == "/")
 		return;
 
+	int root_addr = 9;
 	data_cluster* root_cluster = load_cluster(9);
-	data_cluster* cluster_parent = find_parent(root_cluster, path);
+	data_cluster* cluster_parent = find_parent(root_cluster, path, &root_addr);
 
 	if (cluster_parent){
 		int free_position = find_free_space(cluster_parent->dir);
@@ -193,8 +207,8 @@ void mkdir(char* path)
 			char* dir_name = get_name(path);
 			copy_name(cluster_parent->dir[free_position].filename, dir_name);
 			cluster_parent->dir[free_position].attributes = 1;
-			cluster_parent->dir[free_position].first_block= fat_block;
-			/*write_cluster(fat_block, );*/
+			cluster_parent->dir[free_position].first_block = fat_block;
+			write_cluster(root_addr, cluster_parent);
 		}
 	}
 	else
@@ -221,8 +235,20 @@ int main(void)
 	char* path  = "/usr";
 	mkdir(path);
 
-	char* path2 = "/usr/bin/7z";
-	mkdir(path2);
-	mkdir("/");
+	path = "/bin";
+	mkdir(path);
+
+	path = "/home";
+	mkdir(path);
+
+	path = "/barra";
+	mkdir(path);
+
+	path = "/home/djornada";
+	mkdir(path);
+
+	/*char* path2 = "/usr/bin/7z";*/
+	/*mkdir(path2);*/
+	/*mkdir("/");*/
 	return 0;
 }
