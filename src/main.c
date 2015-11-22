@@ -80,9 +80,26 @@ void load()
 	fclose(ptr_file);
 }
 
-data_cluster* load_cluster(data_cluster cluster)
+data_cluster* load_cluster(int block)
 {
-	return 0;
+
+	data_cluster* cluster;
+	FILE* ptr_file;
+	ptr_file = fopen(fat_name, "rb");
+	fseek(ptr_file, block*sizeof(data_cluster), SEEK_SET);
+	fread(cluster, sizeof(data_cluster), 1, ptr_file);
+	fclose(ptr_file);
+	return cluster;
+}
+
+data_cluster* write_cluster(int block, data_cluster* cluster)
+{
+
+	FILE* ptr_file;
+	ptr_file = fopen(fat_name, "wb");
+	fseek(ptr_file, block*sizeof(data_cluster), SEEK_SET);
+	fwrite(cluster, sizeof(data_cluster), 1, ptr_file);
+	fclose(ptr_file);
 }
 
 data_cluster* find_parent(data_cluster* current_cluster, char* path)
@@ -98,22 +115,21 @@ data_cluster* find_parent(data_cluster* current_cluster, char* path)
 	int i;
 	for (i = 0; i < len; ++i) {
 		dir_entry_t child = current_dir[i];
-		if (child.filename == dir_name && rest)
+		if (strcmp(child.filename, dir_name) && rest)
 		{
-			data_cluster child_cluster = load_cluster()
-			/*return find_parent(child, strtok(NULL, "\0"));*/
+			data_cluster* cluster = load_cluster(child.first_block);
+			return find_parent(cluster, strtok(NULL, "\0"));
 		}
-		/*else if (child->filename == dir_name && !rest){*/
-			/*printf("PATH ALREDY EXISTS\n");*/
-			/*return NULL;*/
-		/*}*/
+		else if (strcmp(child.filename, dir_name) && !rest){
+			printf("PATH ALREDY EXISTS\n");
+			return NULL;
+		}
 
 	}
-	/*if (!rest)*/
-		/*return current_dir;*/
+	if (!rest)
+		return current_cluster;
 
-	/*return NULL;*/
-	/*dir = strtok(NULL, "\0");*/
+	return NULL;
 }
 
 char* get_name(char* path)
@@ -162,26 +178,28 @@ int search_fat_free_block(void)
 	return 0;
 }
 
-/*void mkdir(char* path)*/
-/*{*/
-	/*if(path == "/")*/
-		/*return;*/
+void mkdir(char* path)
+{
+	if(path == "/")
+		return;
 
-	/*dir_entry_t* dir_parent = find_parent(root_dir, path);*/
-	/*if (dir_parent){*/
-		/*int free_position = find_free_space(dir_parent);*/
-		/*int fat_block = search_fat_free_block();*/
-		/*if (fat_block && free_position != -1) {*/
-			/*char* dir_name = get_name(path);*/
-			/*copy_name(dir_parent[free_position].filename, dir_name);*/
-			/*dir_parent[free_position].attributes = 1;*/
-			/*dir_parent[free_position].first_block= fat_block;*/
-		/*}*/
-	/*}*/
-	/*else {*/
-		/*printf("PATH NOT FOUND\n");*/
-	/*}*/
-/*}*/
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster_parent = find_parent(root_cluster, path);
+
+	if (cluster_parent){
+		int free_position = find_free_space(cluster_parent->dir);
+		int fat_block = search_fat_free_block();
+		if (fat_block && free_position != -1) {
+			char* dir_name = get_name(path);
+			copy_name(cluster_parent->dir[free_position].filename, dir_name);
+			cluster_parent->dir[free_position].attributes = 1;
+			cluster_parent->dir[free_position].first_block= fat_block;
+			/*write_cluster(fat_block, );*/
+		}
+	}
+	else
+		printf("PATH NOT FOUND\n");
+}
 
 int main(void)
 {
