@@ -24,6 +24,7 @@ typedef struct _dir_entry_t  dir_entry_t;
 union _data_cluster
 {
 	dir_entry_t dir[CLUSTER_SIZE / sizeof(dir_entry_t)];
+	unsigned char data[CLUSTER_SIZE];
 };
 
 typedef union _data_cluster data_cluster;
@@ -69,7 +70,7 @@ void init(void)
 	fclose(ptr_file);
 }
 
-void load()
+void load(void)
 {
 	FILE* ptr_file;
 	int i;
@@ -79,7 +80,7 @@ void load()
 	fclose(ptr_file);
 }
 
-void save_fat()
+void save_fat(void)
 {
 	FILE* ptr_file;
 	int i;
@@ -110,6 +111,10 @@ data_cluster* write_cluster(int block, data_cluster* cluster)
 	fclose(ptr_file);
 }
 
+void wipe_cluster(int block)
+{
+
+}
 data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 {
 	char path_aux[strlen(path)];
@@ -189,7 +194,7 @@ int find_free_space(dir_entry_t* dir)
 	return -1;
 }
 
-void copy_name(char* target, char* src)
+void copy_str(char* target, char* src)
 {
 	int len = strlen(src);
 	int i;
@@ -225,7 +230,7 @@ void mkdir(char* path)
 		int fat_block = search_fat_free_block();
 		if (fat_block && free_position != -1) {
 			char* dir_name = get_name(path);
-			copy_name(cluster_parent->dir[free_position].filename, dir_name);
+			copy_str(cluster_parent->dir[free_position].filename, dir_name);
 			cluster_parent->dir[free_position].attributes = 1;
 			cluster_parent->dir[free_position].first_block = fat_block;
 			write_cluster(root_addr, cluster_parent);
@@ -268,7 +273,7 @@ void create(char* path)
 		int fat_block = search_fat_free_block();
 		if (fat_block && free_position != -1) {
 			char* dir_name = get_name(path);
-			copy_name(cluster_parent->dir[free_position].filename, dir_name);
+			copy_str(cluster_parent->dir[free_position].filename, dir_name);
 			cluster_parent->dir[free_position].attributes = 2;
 			cluster_parent->dir[free_position].first_block = fat_block;
 			write_cluster(root_addr, cluster_parent);
@@ -278,11 +283,32 @@ void create(char* path)
 		printf("PATH NOT FOUND\n");
 }
 
+void write(char* path, char* content)
+{
+	int root_addr = 9;
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster = find(root_cluster, path, &root_addr);
+	if (cluster){
+		copy_str(cluster->data, content);
+		write_cluster(root_addr, cluster);
+	}
+	else
+		printf("FILE NOT FOUND\n");
+
+}
+
+void unlink(char* path)
+{
+	int root_addr = 9;
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster = find(root_cluster, path, &root_addr);
+}
+
 int main(void)
 {
-	init();
+	/*init();*/
 
-	char name[4096];
+	/*char name[4096];*/
 	/*fgets(name,4096,stdin);*/
 
 
@@ -498,6 +524,8 @@ int main(void)
 
 	path = "/home/djornada/.vimrc";
 	create(path);
+	write(path, "linha 1 do vimrc, ahjashdjasd, ashdajksdhakjdh jkahdkjahsjk ajksdh");
+
 
 	/*ls("/");*/
 	ls("/home/djornada");
