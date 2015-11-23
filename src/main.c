@@ -249,13 +249,10 @@ void ls(char* path)
 	data_cluster* cluster = find(root_cluster, path, &root_addr);
 	int i;
 	if (cluster){
-		printf("\n");
 		for (i = 0; i < 32; ++i){
 			if (cluster->dir[i].attributes == 1 || cluster->dir[i].attributes == 2)
 				printf("%s\n", cluster->dir[i].filename);
 		}
-		printf("\n");
-
 	}
 	else
 		printf("PATH NOT FOUND\n");
@@ -342,7 +339,7 @@ void read(char* path)
 	data_cluster* cluster = find(root_cluster, path, &root_addr);
 	if (cluster)
 		printf("%s\n", cluster->data);
-	
+
 	else
 		printf("FILE NOT FOUND\n");
 }
@@ -359,7 +356,7 @@ void append(char* path, char* content)
 		copy_str(cluster->data, data);
 		write_cluster(root_addr, cluster);
 	}
-		
+
 	else
 		printf("FILE NOT FOUND\n");
 
@@ -367,8 +364,8 @@ void append(char* path, char* content)
 
 void command(void)
 {
-   char name[4096];
-    char name2[4096];
+	char name[4096];
+	char name2[4096];
 	char nameCopy[4096];
 	const char aux[2] = "/";
 	char aux2[4096];
@@ -378,87 +375,87 @@ void command(void)
 
 	fgets(name,4096,stdin);
 
-   strcpy(nameCopy,name);
+	strcpy(nameCopy,name);
 
 	token = strtok(name,aux);
 
-    if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-       printf("Digite o texto");
-       fgets(name2,4096,stdin);
-       append(aux2,name2);
-    }
+	if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		printf("Digite o texto");
+		fgets(name2,4096,stdin);
+		append(aux2,name2);
+	}
 	else if ( strcmp(token, "create ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-        create(aux2);
-    }
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		create(aux2);
+	}
 	else if ( strcmp(token, "init\n") == 0)
-    {
-        init();
-    }
+	{
+		init();
+	}
 	else if ( strcmp(token, "load\n") == 0)
-    {
-        load();
-    }
+	{
+		load();
+	}
 	else if ( strcmp(token, "ls ") == 0 && nameCopy[3] == '/')
-    {
-        for(i = 3; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-3] = nameCopy[i];
-        }
-        ls(aux2);
-    }
+	{
+		for(i = 3; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-3] = nameCopy[i];
+		}
+		ls(aux2);
+	}
 	else if ( strcmp(token, "mkdir ") == 0 && nameCopy[6] == '/')
-    {
-        for(i = 6; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-6] = nameCopy[i];
-        }
-        mkdir(aux2);
-    }
-	else if ( strcmp(token, "read ") == 0 && nameCopy[5] == '/')
-    {
-        for(i = 5; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-5] = nameCopy[i];
-        }
-        read(aux2);
-    }
-	else if ( strcmp(token, "unlink ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-        unlink(aux2);
-    }
-	else if ( strcmp(token, "write ") == 0 && nameCopy[6] == '/')
-    {
+	{
 		for(i = 6; i < strlen(nameCopy)-1; ++i)
 		{
 			aux2[i-6] = nameCopy[i];
 		}
-        printf("Digite o texto");
-        fgets(name2,4096,stdin);
+		mkdir(aux2);
+	}
+	else if ( strcmp(token, "read ") == 0 && nameCopy[5] == '/')
+	{
+		for(i = 5; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-5] = nameCopy[i];
+		}
+		read(aux2);
+	}
+	else if ( strcmp(token, "unlink ") == 0 && nameCopy[7] == '/')
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		unlink(aux2);
+	}
+	else if ( strcmp(token, "write ") == 0 && nameCopy[6] == '/')
+	{
+		for(i = 6; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-6] = nameCopy[i];
+		}
+		printf("Digite o texto");
+		fgets(name2,4096,stdin);
 		write(aux2,name2);
-    }
+	}
 	else printf("nao foi possivel encontrar o comando digitado");
 }
 
 int main(void)
 {
-    while(1)
-    {
-	command();
-    }
+	while(1)
+	{
+		command();
+	}
 
 	return 0;
 }
