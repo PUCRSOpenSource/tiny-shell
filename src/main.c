@@ -135,6 +135,7 @@ data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 			return find_parent(cluster, rest, addr);
 		}
 		else if (strcmp(child.filename, dir_name) == 0 && !rest){
+			*addr = child.first_block;
 			return NULL;
 		}
 		i++;
@@ -311,6 +312,18 @@ void unlink(char* path)
 		save_fat();
 		int root_addr = 9;
 		data_cluster* root_cluster = load_cluster(root_addr);
+		find_parent(root_cluster, path, &root_addr);
+
+		char* name = get_name(path);
+		data_cluster* parent_cluster = load_cluster(root_addr);
+
+		int i;
+		for (i = 0; i < 32; ++i) {
+			if (strcmp(parent_cluster->dir[i].filename, name)==0) {
+				parent_cluster->dir[i].attributes = 0x0;
+				break;
+			}
+		}
 	}
 	else
 		printf("FILE NOT FOUND\n");
