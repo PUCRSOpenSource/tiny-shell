@@ -367,127 +367,78 @@ void append(char* path, char* content)
 
 void command(void)
 {
-	char name[4096];
+    char name[4096];
 	char nameCopy[4096];
-	const char aux[2] = "/";
-	char aux2[4096];
 
 	char *token;
-	int i;
+	char *rest;
+    char *rest2;
 
 	fgets(name,4096,stdin);
 
-	strcpy(nameCopy,name);
+    strcpy(nameCopy,name);
+    //token == comando
+	token = strtok(name," ");
+	//rest == path
+	rest = strtok(NULL, " ");
+	//rest2 == string
+	rest2 = strtok(NULL, "\n");
+	printf("%s",nameCopy);
+	printf("%s",token);
+	printf("%s",rest);
+	printf("%s",rest2);
 
-	token = strtok(name,aux);
-
-	if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
-	{
-		for(i = 7; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-7] = nameCopy[i];
-		}
-		/*append(aux2);*/
-	}
-	else if ( strcmp(token, "create ") == 0 && nameCopy[7] == '/')
-	{
-		for(i = 7; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-7] = nameCopy[i];
-		}
-		create(aux2);
-	}
-	else if ( strcmp(token, "init\n") == 0)
-	{
-		init();
-	}
-	else if ( strcmp(token, "load\n") == 0)
-	{
-		load();
-	}
-	else if ( strcmp(token, "ls ") == 0 && nameCopy[3] == '/')
-	{
-		for(i = 3; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-3] = nameCopy[i];
-		}
-		ls(aux2);
-	}
-	else if ( strcmp(token, "mkdir ") == 0 && nameCopy[6] == '/')
-	{
-		for(i = 6; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-6] = nameCopy[i];
-		}
-		mkdir(aux2);
-	}
-	else if ( strcmp(token, "read ") == 0 && nameCopy[5] == '/')
-	{
-		for(i = 5; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-5] = nameCopy[i];
-		}
-		read(aux2);
-	}
-	else if ( strcmp(token, "unlink ") == 0 && nameCopy[7] == '/')
-	{
-		for(i = 7; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-7] = nameCopy[i];
-		}
-		unlink(aux2);
-	}
-	else if ( strcmp(token, "write ") == 0 && nameCopy[6] == '/')
-	{
-		for(i = 6; i < strlen(nameCopy)-1; ++i)
-		{
-			aux2[i-6] = nameCopy[i];
-		}
-		/*write(aux2);*/
-	}
+    if ( strcmp(token, "append") == 0 && nameCopy[7] == '/')
+    {
+        append(rest,rest2);
+    }
+	else if ( strcmp(token, "create") == 0 && nameCopy[7] == '/')
+    {
+       create(rest);
+    }
+	else if ( strcmp(nameCopy, "init\n") == 0)
+    {
+        printf("Entrei\n");
+        init();
+    }
+	else if ( strcmp(nameCopy, "load\n") == 0)
+    {
+        load();
+    }
+	else if ( strcmp(token, "ls") == 0 && nameCopy[3] == '/')
+    {
+         ls(rest);
+    }
+	else if ( strcmp(token, "mkdir") == 0 && nameCopy[6] == '/')
+    {
+        printf("Entrei\n");
+        mkdir(rest);
+    }
+	else if ( strcmp(token, "read") == 0 && nameCopy[5] == '/')
+    {
+        read(rest);
+    }
+	else if ( strcmp(token, "unlink") == 0 && nameCopy[7] == '/')
+    {
+        unlink(rest);
+    }
+	else if ( strcmp(token, "write") == 0 && nameCopy[6] == '/')
+    {
+		write(rest,rest2);
+    }
+    else if(strcmp(token, "exit"))
+    {
+       exit(0);
+    }
 	else printf("nao foi possivel encontrar o comando digitado");
 }
 
 int main(void)
 {
-	//command();
-	init();
-
-	char* path  = "/usr";
-	mkdir(path);
-
-	path = "/bin";
-	mkdir(path);
-
-	path = "/home";
-	mkdir(path);
-
-	path = "/barra";
-	mkdir(path);
-
-	path = "/home/djornada";
-	mkdir(path);
-
-	path = "/home/djornada/Desktop";
-	mkdir(path);
-
-	path = "/home/djornada/Downloads";
-	mkdir(path);
-
-	path = "/home/djornada/.vimrc";
-	create(path);
-	write(path, "linha 1 do vimrc\n");
-	read(path);
-	append(path, "linha 2 do vimrc");
-	read(path);
-	ls("/home/djornada");
-
-	unlink("/home/djornada/Desktop");
-	/*unlink(path);*/
-
-
-	/*ls("/");*/
-	ls("/home/djornada");
+    while(1)
+    {
+	command();
+    }
 
 	return 0;
 }
