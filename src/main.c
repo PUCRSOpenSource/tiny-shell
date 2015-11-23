@@ -364,11 +364,11 @@ void append(char* path, char* content)
 
 void command(void)
 {
-	char name[4096];
-	char name2[4096];
-	char nameCopy[4096];
+	char name[4096] = { 0 };
+    char name2[4096] = { 0 };
+	char nameCopy[4096] = { 0 };
 	const char aux[2] = "/";
-	char aux2[4096];
+	char aux2[4096] = { 0 };
 
 	char *token;
 	int i;
