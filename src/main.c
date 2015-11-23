@@ -151,7 +151,7 @@ data_cluster* find(data_cluster* current_cluster, char* path, int* addr)
 {
 	if (!path || strcmp(path, "/") == 0)
 		return current_cluster;
-		
+
 	char path_aux[strlen(path)];
 	strcpy(path_aux, path);
 	char* dir_name = strtok(path_aux, "/");
@@ -299,6 +299,16 @@ void write(char* path, char* content)
 		printf("FILE NOT FOUND\n");
 
 }
+int empty(int block)
+{
+	data_cluster* cluster = load_cluster(block);
+	int i;
+	for (i = 0; i < 32; ++i)
+		if(cluster->dir[i].attributes != 0)
+			return 0;
+
+	return 1;
+}
 
 void unlink(char* path)
 {
@@ -307,20 +317,26 @@ void unlink(char* path)
 	data_cluster* root_cluster = load_cluster(9);
 	data_cluster* cluster = find(root_cluster, path, &root_addr);
 	if (cluster) {
-		wipe_cluster(root_addr);
-		fat[root_addr] = 0x0000;
-		save_fat();
-		int root_addr = 9;
-		data_cluster* root_cluster = load_cluster(root_addr);
+		int parent_addr = 9;
+		data_cluster* root_cluster = load_cluster(parent_addr);
 		find_parent(root_cluster, path, &root_addr);
-
 		char* name = get_name(path);
 		data_cluster* parent_cluster = load_cluster(root_addr);
-
 		int i;
 		for (i = 0; i < 32; ++i) {
 			if (strcmp(parent_cluster->dir[i].filename, name)==0) {
-				parent_cluster->dir[i].attributes = 0x0;
+				printf("iguais\n");
+				printf("%d\n",parent_cluster->dir[i].attributes);
+				printf("%d\n", empty(parent_cluster->dir[i].first_block));
+				if((parent_cluster->dir[i].attributes == 1 && empty(parent_cluster->dir[i].first_block)) ||
+						parent_cluster->dir[i].attributes == 2){
+					parent_cluster->dir[i].attributes  = 0;
+					parent_cluster->dir[i].first_block = 0;
+					wipe_cluster(root_addr);
+					fat[root_addr] = 0x0000;
+					save_fat();
+					printf("FILE REMOVED\n");
+				}
 				break;
 			}
 		}
@@ -332,7 +348,7 @@ void unlink(char* path)
 
 void command(void)
 {
-   char name[4096];
+	char name[4096];
 	char nameCopy[4096];
 	const char aux[2] = "/";
 	char aux2[4096];
@@ -342,84 +358,82 @@ void command(void)
 
 	fgets(name,4096,stdin);
 
-    strcpy(nameCopy,name);
+	strcpy(nameCopy,name);
 
 	token = strtok(name,aux);
 
-    if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-        append(aux2);
-    }
+	if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		append(aux2);
+	}
 	else if ( strcmp(token, "create ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-        create(aux2);
-    }
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		create(aux2);
+	}
 	else if ( strcmp(token, "init\n") == 0)
-    {
-        init();
-    }
+	{
+		init();
+	}
 	else if ( strcmp(token, "load\n") == 0)
-    {
-        load();
-    }
+	{
+		load();
+	}
 	else if ( strcmp(token, "ls ") == 0 && nameCopy[3] == '/')
-    {
-        for(i = 3; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-3] = nameCopy[i];
-        }
-        ls(aux2);
-    }
+	{
+		for(i = 3; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-3] = nameCopy[i];
+		}
+		ls(aux2);
+	}
 	else if ( strcmp(token, "mkdir ") == 0 && nameCopy[6] == '/')
-    {
-        for(i = 6; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-6] = nameCopy[i];
-        }
-        mkdir(aux2);
-    }
+	{
+		for(i = 6; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-6] = nameCopy[i];
+		}
+		mkdir(aux2);
+	}
 	else if ( strcmp(token, "read ") == 0 && nameCopy[5] == '/')
-    {
-        for(i = 5; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-5] = nameCopy[i];
-        }
-        read(aux2);
-    }
+	{
+		for(i = 5; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-5] = nameCopy[i];
+		}
+		read(aux2);
+	}
 	else if ( strcmp(token, "unlink ") == 0 && nameCopy[7] == '/')
-    {
-        for(i = 7; i < strlen(nameCopy)-1; ++i)
-        {
-            aux2[i-7] = nameCopy[i];
-        }
-        unlink(aux2);
-    }
+	{
+		for(i = 7; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-7] = nameCopy[i];
+		}
+		unlink(aux2);
+	}
 	else if ( strcmp(token, "write ") == 0 && nameCopy[6] == '/')
-    {
+	{
 		for(i = 6; i < strlen(nameCopy)-1; ++i)
 		{
 			aux2[i-6] = nameCopy[i];
 		}
 		write(aux2);
-    }
+	}
 	else printf("nao foi possivel encontrar o comando digitado");
 }
 
 int main(void)
 {
-
 	//command();
 	init();
 
-	
 
 	char* path  = "/usr";
 	mkdir(path);
@@ -445,6 +459,7 @@ int main(void)
 	path = "/home/djornada/.vimrc";
 	create(path);
 	write(path, "linha 1 do vimrc, ahjashdjasd, ashdajksdhakjdh jkahdkjahsjk ajksdh");
+	unlink(path);
 
 
 	/*ls("/");*/
