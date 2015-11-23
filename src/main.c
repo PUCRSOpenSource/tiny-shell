@@ -330,202 +330,96 @@ void unlink(char* path)
 
 }
 
+void command(void)
+{
+   char name[4096];
+	char nameCopy[4096];
+	const char aux[2] = "/";
+	char aux2[4096];
+
+	char *token;
+	int i;
+
+	fgets(name,4096,stdin);
+
+    strcpy(nameCopy,name);
+
+	token = strtok(name,aux);
+
+    if ( strcmp(token, "append ") == 0 && nameCopy[7] == '/')
+    {
+        for(i = 7; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-7] = nameCopy[i];
+        }
+        append(aux2);
+    }
+	else if ( strcmp(token, "create ") == 0 && nameCopy[7] == '/')
+    {
+        for(i = 7; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-7] = nameCopy[i];
+        }
+        create(aux2);
+    }
+	else if ( strcmp(token, "init\n") == 0)
+    {
+        init();
+    }
+	else if ( strcmp(token, "load\n") == 0)
+    {
+        load();
+    }
+	else if ( strcmp(token, "ls ") == 0 && nameCopy[3] == '/')
+    {
+        for(i = 3; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-3] = nameCopy[i];
+        }
+        ls(aux2);
+    }
+	else if ( strcmp(token, "mkdir ") == 0 && nameCopy[6] == '/')
+    {
+        for(i = 6; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-6] = nameCopy[i];
+        }
+        mkdir(aux2);
+    }
+	else if ( strcmp(token, "read ") == 0 && nameCopy[5] == '/')
+    {
+        for(i = 5; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-5] = nameCopy[i];
+        }
+        read(aux2);
+    }
+	else if ( strcmp(token, "unlink ") == 0 && nameCopy[7] == '/')
+    {
+        for(i = 7; i < strlen(nameCopy)-1; ++i)
+        {
+            aux2[i-7] = nameCopy[i];
+        }
+        unlink(aux2);
+    }
+	else if ( strcmp(token, "write ") == 0 && nameCopy[6] == '/')
+    {
+		for(i = 6; i < strlen(nameCopy)-1; ++i)
+		{
+			aux2[i-6] = nameCopy[i];
+		}
+		write(aux2);
+    }
+	else printf("nao foi possivel encontrar o comando digitado");
+}
+
 int main(void)
 {
-	/*init();*/
 
-	/*char name[4096];*/
-	/*fgets(name,4096,stdin);*/
+	//command();
+	init();
 
-
-	//printf("%s", name);
-	/*if(name[0] == 'a')*/
-	/*{*/
-		/*//printf("%s", name);*/
-		/*char append[7];*/
-		/*char append2[4000];*/
-		/*int i;*/
-		/*//printf("%s", name);*/
-		/*for(i=0; i < 7; ++i)*/
-		/*{*/
-			/*//printf("%s", name);*/
-			/*append[i] = name[i];*/
-			/*//printf("Append++\n");*/
-		/*}*/
-		/*//printf("%s", append);*/
-		/*//printf("%s", name);*/
-		/*if ( strcmp(append, "append ") == 0 && name[7] == '/')*/
-		/*{*/
-			/*//printf("%s", append);*/
-			/*for(i = 7; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*append2[i-7] = name[i];*/
-			/*}*/
-			/*//append(append2);*/
-			/*//printf("%s", name);*/
-			/*printf("ChamaAppend\n");*/
-			/*printf("%s", append2);*/
-
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'c')*/
-	/*{*/
-		/*char create[7];*/
-		/*char create2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 7; ++i)*/
-		/*{*/
-			/*create[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(create, "create ") == 0 && name[7] == '/')*/
-		/*{*/
-			/*for(i = 7; i < strlen(name) - 1; ++i)*/
-			/*{*/
-				/*create2[i-7] = name[i];*/
-			/*}*/
-			/*//create(create2);*/
-			/*printf("ChamaCreate");*/
-			/*printf("%s", create2);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'i')*/
-	/*{*/
-		/*char init[4];*/
-		/*int i;*/
-		/*for(i=0; i < 4; ++i)*/
-		/*{*/
-			/*init[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(init, "init") == 0)*/
-		/*{*/
-			/*//init(init);*/
-			/*printf("ChamaInit\n");*/
-			/*printf("%s", init);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'l' && name[1] == 'o')*/
-	/*{*/
-		/*char load[4];*/
-		/*int i;*/
-		/*for(i=0; i < 4; ++i)*/
-		/*{*/
-			/*load[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(load, "load") == 0)*/
-		/*{*/
-			/*//load(load);*/
-			/*printf("ChamaLoad\n");*/
-			/*printf("%s", load);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'l')*/
-	/*{*/
-		/*char ls[3];*/
-		/*char ls2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 3; ++i)*/
-		/*{*/
-			/*ls[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(ls, "ls ") == 0 && name[3] == '/')*/
-		/*{*/
-			/*for(i = 3; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*ls2[i-3] = name[i];*/
-			/*}*/
-			/*//ls(ls2);*/
-			/*printf("ChamaLs\n");*/
-			/*printf("%s", ls2);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'm')*/
-	/*{*/
-		/*char mkdir[6];*/
-		/*char mkdir2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 6; ++i)*/
-		/*{*/
-			/*mkdir[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(mkdir, "mkdir ") == 0 && name[6] == '/')*/
-		/*{*/
-			/*for(i = 6; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*mkdir2[i-6] = name[i];*/
-			/*}*/
-			/*//mkdir(mkdir2);*/
-			/*printf("ChamaMkdir\n");*/
-			/*printf("%s", mkdir2);*/
-		/*}*/
-	/*}*/
-	/*else if(name[0] == 'r')*/
-	/*{*/
-		/*char read[5];*/
-		/*char read2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 5; ++i)*/
-		/*{*/
-			/*read[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(read, "read ") == 0 && name[5] == '/')*/
-		/*{*/
-			/*for(i = 5; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*read2[i-5] = name[i];*/
-			/*}*/
-			/*//read(read2);*/
-			/*printf("ChamaRead\n");*/
-			/*printf("%s", read2);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'u')*/
-	/*{*/
-		/*char unlink[7];*/
-		/*char unlink2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 7; ++i)*/
-		/*{*/
-			/*unlink[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(unlink, "unlink ") == 0 && name[7] == '/')*/
-		/*{*/
-			/*for(i = 7; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*unlink2[i-7] = name[i];*/
-			/*}*/
-			/*//unlink(unlink2);*/
-			/*printf("ChamaUnlink\n");*/
-			/*printf("%s", unlink2);*/
-		/*}*/
-
-	/*}*/
-	/*else if(name[0] == 'w')*/
-	/*{*/
-		/*char write[6];*/
-		/*char write2[4000];*/
-		/*int i;*/
-		/*for(i=0; i < 6; ++i)*/
-		/*{*/
-			/*write[i] = name[i];*/
-		/*}*/
-		/*if ( strcmp(write, "write ") == 0 && name[6] == '/')*/
-		/*{*/
-			/*for(i = 6; i < strlen(name)-1; ++i)*/
-			/*{*/
-				/*write2[i-6] = name[i];*/
-			/*}*/
-			/*//write(write2);*/
-			/*printf("ChamaWrite\n");*/
-			/*printf("%s", write2);*/
-		/*}*/
-
-	/*}*/
+	
 
 	char* path  = "/usr";
 	mkdir(path);
