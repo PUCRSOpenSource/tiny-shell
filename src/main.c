@@ -113,7 +113,9 @@ data_cluster* write_cluster(int block, data_cluster* cluster)
 
 void wipe_cluster(int block)
 {
-
+	data_cluster* cluster;
+	cluster = calloc(1, sizeof(data_cluster));
+	write_cluster(block, cluster);
 }
 data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 {
@@ -299,9 +301,20 @@ void write(char* path, char* content)
 
 void unlink(char* path)
 {
+	load();
 	int root_addr = 9;
 	data_cluster* root_cluster = load_cluster(9);
 	data_cluster* cluster = find(root_cluster, path, &root_addr);
+	if (cluster) {
+		wipe_cluster(root_addr);
+		fat[root_addr] = 0x0000;
+		save_fat();
+		int root_addr = 9;
+		data_cluster* root_cluster = load_cluster(root_addr);
+	}
+	else
+		printf("FILE NOT FOUND\n");
+
 }
 
 int main(void)
