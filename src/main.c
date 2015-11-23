@@ -134,8 +134,7 @@ data_cluster* find_parent(data_cluster* current_cluster, char* path, int* addr)
 			*addr = child.first_block;
 			return find_parent(cluster, rest, addr);
 		}
-		else if (strcmp(child.filename, dir_name) == 0 && !rest){
-			*addr = child.first_block;
+		else if (strcmp(child.filename, dir_name) == 0 && rest){
 			return NULL;
 		}
 		i++;
@@ -313,34 +312,54 @@ int empty(int block)
 void unlink(char* path)
 {
 	load();
+	int i;
 	int root_addr = 9;
-	data_cluster* root_cluster = load_cluster(9);
-	data_cluster* cluster = find(root_cluster, path, &root_addr);
+	data_cluster* root_cluster = load_cluster(root_addr);
+	find_parent(root_cluster, path, &root_addr);
+	data_cluster* cluster = load_cluster(root_addr);
 	if (cluster) {
-		int parent_addr = 9;
-		data_cluster* root_cluster = load_cluster(parent_addr);
-		find_parent(root_cluster, path, &root_addr);
 		char* name = get_name(path);
-		data_cluster* parent_cluster = load_cluster(root_addr);
-		int i;
 		for (i = 0; i < 32; ++i) {
-			if (strcmp(parent_cluster->dir[i].filename, name)==0) {
-				printf("iguais\n");
-				printf("%d\n",parent_cluster->dir[i].attributes);
-				printf("%d\n", empty(parent_cluster->dir[i].first_block));
-				if((parent_cluster->dir[i].attributes == 1 && empty(parent_cluster->dir[i].first_block)) ||
-						parent_cluster->dir[i].attributes == 2){
-					parent_cluster->dir[i].attributes  = 0;
-					parent_cluster->dir[i].first_block = 0;
-					wipe_cluster(root_addr);
-					fat[root_addr] = 0x0000;
-					save_fat();
-					printf("FILE REMOVED\n");
-				}
-				break;
+			if (strcmp(cluster->dir[i].filename, name)==0) {
+				cluster->dir[i].attributes = -1;
+				int first = cluster->dir[i].first_block;
+				fat[first] = 0x0000;
+				save_fat();
+				write_cluster(root_addr, cluster);
 			}
 		}
 	}
+	else
+		printf("FILE NOT FOUND UNLINK\n");
+
+}
+
+void read(char* path)
+{
+	load();
+	int root_addr = 9;
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster = find(root_cluster, path, &root_addr);
+	if (cluster)
+		printf("%s\n", cluster->data);
+	
+	else
+		printf("FILE NOT FOUND\n");
+}
+
+void append(char* path, char* content)
+{
+	load();
+	int root_addr = 9;
+	data_cluster* root_cluster = load_cluster(9);
+	data_cluster* cluster = find(root_cluster, path, &root_addr);
+	if (cluster){
+		char* data = cluster->data;
+		strcat(data, content);
+		copy_str(cluster->data, data);
+		write_cluster(root_addr, cluster);
+	}
+		
 	else
 		printf("FILE NOT FOUND\n");
 
@@ -368,7 +387,7 @@ void command(void)
 		{
 			aux2[i-7] = nameCopy[i];
 		}
-		append(aux2);
+		/*append(aux2);*/
 	}
 	else if ( strcmp(token, "create ") == 0 && nameCopy[7] == '/')
 	{
@@ -424,7 +443,7 @@ void command(void)
 		{
 			aux2[i-6] = nameCopy[i];
 		}
-		write(aux2);
+		/*write(aux2);*/
 	}
 	else printf("nao foi possivel encontrar o comando digitado");
 }
@@ -433,7 +452,6 @@ int main(void)
 {
 	//command();
 	init();
-
 
 	char* path  = "/usr";
 	mkdir(path);
@@ -458,8 +476,14 @@ int main(void)
 
 	path = "/home/djornada/.vimrc";
 	create(path);
-	write(path, "linha 1 do vimrc, ahjashdjasd, ashdajksdhakjdh jkahdkjahsjk ajksdh");
-	unlink(path);
+	write(path, "linha 1 do vimrc\n");
+	read(path);
+	append(path, "linha 2 do vimrc");
+	read(path);
+	ls("/home/djornada");
+
+	unlink("/home/djornada/Desktop");
+	/*unlink(path);*/
 
 
 	/*ls("/");*/
