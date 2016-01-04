@@ -127,3 +127,6 @@ devem ser implementados no shell:
 	(sobrescrever dados)
 * `append "string" [/caminho/arquivo]` - anexar dados em um arquivo
 * `read [/caminho/arquivo]` - ler o conteúdo de um arquivo
+
+## thanks
+* README by [execb5](https://github.com/execb5) 
